@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatting App</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  .chat-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+  }
+  .message {
+    background-color: #f2f2f2;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  .user-message {
+    background-color: #DCF8C6;
+    align-self: flex-end;
+  }
+  .input-container {
+    display: flex;
+    max-width: 800px;
+    margin-top: 20px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+    .database-container {
+    display: flex;
+    max-width: 800px;
+    margin-top: 20px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .input-field {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+  .send-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+  .send-button2 {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+  }
+
+  
+  .message {
+    /* ... Existing styles ... */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .user-message {
+    /* ... Existing styles ... */
+    align-self: flex-end;
+  }
+
+  .timestamp {
+    /* ... New styles for timestamp ... */
+    align-self: flex-end;
+    font-size: 12px;
+    color: #888;
+    margin-top: 5px;
+  }
+
+  .user-message {
+    /* ... Existing styles ... */
+    align-self: flex-end;
+  }
+  .name-tag {
+    font-weight: bold;
+    align-self: flex-end;
+    color: #333; /* Change the color as desired */
+  }
+  .application-name{
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2px;
+    border: 1px solid #ccc;
+    background-color: antiquewhite;
+    border-radius: 10px;
+    text-align: center;
+  }
+  .name-container{
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2px;
+    border-radius: 10px;
+  }
+</style>
+</head>
+<body>
+    <div class="application-name" id="applicationName">
+        <h2>Open Chat</h2>
+    </div>
+    <div class="name-container" id="nameContainer">
+        <input type="text" class="input-field" id="nameInput" placeholder="Enter your name...">
+        <button class="send-button" id="setNameButton">Set Name</button>
+      </div>
+  <div class="chat-container" id="chatContainer">
+    <!-- Existing messages will go here -->
+  </div>
+  <div class="input-container">
+    <input type="text" class="input-field" id="messageInput" placeholder="Type your message...">
+    <button class="send-button" id="sendButton" style="background:#4CAF50;" >Send</button>
+  </div>
+  <form method="post" action="entries.php">
+  <div class="database-container">
+    <button class="send-button2"  type="submit" > View Database </button>
+  </div>
+  </form>
+
+
+
+  <script>
+const nameContainer = document.getElementById('nameContainer');
+    const nameInput = document.getElementById('nameInput');
+    const setNameButton = document.getElementById('setNameButton');
+    const chatContainer = document.getElementById('chatContainer');
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    let username = '';
+
+    setNameButton.addEventListener('click', () => {
+      const enteredName = nameInput.value.trim();
+      if (enteredName !== '') {
+        username = enteredName;
+        nameContainer.style.display = 'none';
+        chatContainer.style.display = 'block';
+        messageInput.style.display = 'block';
+        sendButton.style.display = 'block';
+      }
+    });
+
+    sendButton.addEventListener('click', () => {
+      const messageText = messageInput.value.trim();
+      if (username && messageText !== '') {
+      if (messageText !== '') {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'user-message');
+
+        const messageContent = document.createElement('div');
+        messageContent.textContent = messageText;
+        messageDiv.appendChild(messageContent);
+
+        const timestamp = document.createElement('div');
+        timestamp.classList.add('timestamp');
+        timestamp.textContent = getCurrentTime();
+        messageDiv.appendChild(timestamp);
+
+        const nameTag = document.createElement('div');
+        nameTag.classList.add('name-tag');
+        nameTag.textContent = "-"+username;
+        messageDiv.appendChild(nameTag);
+
+        chatContainer.appendChild(messageDiv);
+        messageInput.value = ''; // Clear the input field
+
+        const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'save_message.php', true);
+      xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          // Message saved, update UI or show feedback
+        }
+      };
+      const data = 'username=' + encodeURIComponent(username) + '&message=' + encodeURIComponent(messageText);
+      xhr.send(data);
+
+      }
+    }
+    else {
+      alert('Please set your name and enter a message before sending.');
+    }
+    });
+
+    function getCurrentTime() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      return `${hours}:${minutes}`;
+    }
+
+    messageInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        sendButton.click();
+      }
+    });
+  </script>
+</body>
+</html>
